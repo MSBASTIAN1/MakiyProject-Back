@@ -3,8 +3,9 @@
 const { v4: uuidv4 } = require("uuid");
 const AWS = require("aws-sdk");
 //AWS.config.update({ region: process.env.REGION });
-const dynamodb = new AWS.DynamoDB.DocumentClient({region: process.env.REGION});
-
+const dynamodb = new AWS.DynamoDB.DocumentClient({
+  region: process.env.REGION,
+});
 
 //Insert
 module.exports.insert = async (event) => {
@@ -17,24 +18,28 @@ module.exports.insert = async (event) => {
     idCustomer: idCustomer,
     cedula: body.cedula,
     name: body.name,
-    address: body.address
+    address: body.address,
   };
 
   const params = {
     TableName: "CustomerTable",
-    Item: customer
+    Item: customer,
   };
 
   const result = await dynamodb.put(params).promise();
   return {
     statusCode: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",  // Permite el acceso desde cualquier origen
+      "Access-Control-Allow-Credentials": true,  // Permite el uso de credenciales (cookies, cabeceras de autorización) en las solicitudes
+    },
     body: JSON.stringify(
-        {
-          message: "Insertado Correctamente",
-          data:customer
-        },
-        null,
-        2
+      {
+        message: "Insertado Correctamente",
+        data: customer,
+      },
+      null,
+      2
     ),
   };
 };
@@ -55,32 +60,38 @@ module.exports.select = async (event) => {
     // Retorna una respuesta con el resultado
     return {
       statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify(
-          {
-            message: "Datos seleccionados",
-            result: result.Items, // result.Items contiene los datos escaneados
-          },
-          null,
-          2
+        {
+          message: "Datos seleccionados",
+          result: result.Items, // result.Items contiene los datos escaneados
+        },
+        null,
+        2
       ),
     };
   } catch (error) {
     console.error("Error al seleccionar datos", error);
     return {
       statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify(
-          {
-            message: "Error al seleccionar datos",
-            error: error.message,
-          },
-          null,
-          2
+        {
+          message: "Error al seleccionar datos",
+          error: error.message,
+        },
+        null,
+        2
       ),
     };
   }
 };
-
-
 
 //Update
 module.exports.update = async (event) => {
@@ -119,19 +130,23 @@ module.exports.update = async (event) => {
       idCustomer: body.idCustomer,
       cedula: body.cedula,
       name: body.name,
-      address: body.address
+      address: body.address,
     };
 
     // Retorna una respuesta
     return {
       statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify(
-          {
-            message: "Actualizado",
-            data: updatedCustomer,
-          },
-          null,
-          2
+        {
+          message: "Actualizado",
+          data: updatedCustomer,
+        },
+        null,
+        2
       ),
     };
   } catch (error) {
@@ -139,25 +154,33 @@ module.exports.update = async (event) => {
     if (error.code === "ConditionalCheckFailedException") {
       return {
         statusCode: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
         body: JSON.stringify(
-            {
-              message: "El ítem con idCustomer proporcionado no existe.",
-            },
-            null,
-            2
+          {
+            message: "El ítem con idCustomer proporcionado no existe.",
+          },
+          null,
+          2
         ),
       };
     }
     console.error("Error al actualizar los datos", error);
     return {
       statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify(
-          {
-            message: "Error al actualizar los datos",
-            error: error.message,
-          },
-          null,
-          2
+        {
+          message: "Error al actualizar los datos",
+          error: error.message,
+        },
+        null,
+        2
       ),
     };
   }
@@ -174,18 +197,18 @@ module.exports.delete = async (event) => {
   const getParams = {
     TableName: "CustomerTable",
     Key: {
-      idCustomer: body.idCustomer
-    }
+      idCustomer: body.idCustomer,
+    },
   };
 
   // Definimos los parámetros para la operación de eliminación en DynamoDB
   const deleteParams = {
     TableName: "CustomerTable",
     Key: {
-      idCustomer: body.idCustomer
+      idCustomer: body.idCustomer,
     },
     // Condición para asegurarse de que el ítem exista
-    ConditionExpression: "attribute_exists(idCustomer)"
+    ConditionExpression: "attribute_exists(idCustomer)",
   };
 
   try {
@@ -197,13 +220,17 @@ module.exports.delete = async (event) => {
     if (!customerToDelete) {
       return {
         statusCode: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
         body: JSON.stringify(
-            {
-              message: "El ítem con idCustomer proporcionado no existe."
-            },
-            null,
-            2
-        )
+          {
+            message: "El ítem con idCustomer proporcionado no existe.",
+          },
+          null,
+          2
+        ),
       };
     }
 
@@ -213,29 +240,35 @@ module.exports.delete = async (event) => {
     // Retornar una respuesta con los datos del ítem eliminado
     return {
       statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify(
-          {
-            message: "Eliminado",
-            data: customerToDelete
-          },
-          null,
-          2
-      )
+        {
+          message: "Eliminado",
+          data: customerToDelete,
+        },
+        null,
+        2
+      ),
     };
   } catch (error) {
     console.error("Error al eliminar los datos", error);
     return {
       statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify(
-          {
-            message: "Error al eliminar los datos",
-            error: error.message
-          },
-          null,
-          2
-      )
+        {
+          message: "Error al eliminar los datos",
+          error: error.message,
+        },
+        null,
+        2
+      ),
     };
   }
 };
-
-

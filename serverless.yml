@@ -29,6 +29,7 @@ functions:
       - http:
           path: v1/makiy/insert
           method: post
+          cors: true
 
   select:
     handler: handler.select
@@ -36,7 +37,7 @@ functions:
       - http:
           path: v1/makiy/select
           method: get
-
+          cors: true
 
   update:
     handler: handler.update
@@ -44,6 +45,7 @@ functions:
       - http:
           path: v1/makiy/update
           method: put
+          cors: true
 
   delete:
     handler: handler.delete
@@ -51,6 +53,8 @@ functions:
       - http:
           path: v1/makiy/delete
           method: delete
+          cors: true
+          
 resources:
   Resources:
     CustomerTable:
