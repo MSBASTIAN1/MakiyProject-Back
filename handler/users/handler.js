@@ -33,7 +33,14 @@ module.exports.insert = async (event) => {
   const body = JSON.parse(event.body);
 
   // Check if body contains the expected data
-  if (!body.name) {
+  if (
+    !body.first_name ||
+    !body.last_name ||
+    !body.email ||
+    !body.password ||
+    !body.address ||
+    !body.phone_number
+  ) {
     return {
       statusCode: 400,
       headers: {
@@ -51,14 +58,19 @@ module.exports.insert = async (event) => {
     };
   }
 
-  const category = {
+  const users = {
     id: id,
-    name: body.name,
+    first_name: body.first_name,
+    last_name: body.last_name,
+    email: body.email,
+    password: body.password,
+    address: body.address,
+    phone_number: body.phone_number,
   };
 
   const params = {
-    TableName: process.env.CATEGORIES_TABLE,
-    Item: category,
+    TableName: process.env.USERS_TABLE,
+    Item: users,
   };
 
   try {
@@ -72,7 +84,7 @@ module.exports.insert = async (event) => {
       body: JSON.stringify(
         {
           message: "Inserted Successfully",
-          data: category,
+          data: users,
         },
         null,
         2
@@ -104,7 +116,7 @@ module.exports.select = async (event) => {
 
   // Define the parameters for the DynamoDB scan operation
   const params = {
-    TableName: process.env.CATEGORIES_TABLE,
+    TableName: process.env.USERS_TABLE,
   };
 
   try {
@@ -154,19 +166,21 @@ module.exports.update = async (event) => {
 
   // Define the parameters for the DynamoDB update operation
   const params = {
-    TableName: process.env.CATEGORIES_TABLE, // Specify the table where the update will occur
+    TableName: process.env.USERS_TABLE, // Specify the table where the update will occur
     Key: {
       id: body.id, // Specify the primary key of the item to be updated
     },
-    // Update expression to modify the item's attributes, capturing reserved words
-    UpdateExpression: "SET #name = :name",
-    // Aliases for reserved keywords
-    ExpressionAttributeNames: {
-      "#name": "name",
-    },
+    // Update expression to modify the item's attributes
+    UpdateExpression:
+      "SET first_name = :first_name, last_name = :last_name, password = :password , address = :address, email = :email, phone_number = :phone_number",
     // Values for the attributes to be set
     ExpressionAttributeValues: {
-      ":name": body.name,
+      ":first_name": body.first_name,
+      ":last_name": body.last_name,
+      ":password": body.password,
+      ":address": body.address,
+      ":email": body.email,
+      ":phone_number": body.phone_number,
     },
     // Condition to ensure the item exists
     ConditionExpression: "attribute_exists(id)",
@@ -175,10 +189,15 @@ module.exports.update = async (event) => {
   try {
     // Execute the update operation and wait for it to complete
     await dynamodb.update(params).promise();
-    // Create the updated category object to display it later
-    const updatedCategory = {
+    // Create the updated user object to display it later
+    const updatedUser = {
       id: body.id,
-      name: body.name,
+      first_name: body.first_name,
+      last_name: body.last_name,
+      password: body.password,
+      address: body.address,
+      email: body.email,
+      phone_number: body.phone_number,
     };
 
     return {
@@ -190,7 +209,7 @@ module.exports.update = async (event) => {
       body: JSON.stringify(
         {
           message: "Updated",
-          data: updatedCategory,
+          data: updatedUser,
         },
         null,
         2
@@ -241,7 +260,7 @@ module.exports.delete = async (event) => {
 
   // Define the parameters to get the item before deleting it
   const getParams = {
-    TableName: process.env.CATEGORIES_TABLE,
+    TableName: process.env.USERS_TABLE,
     Key: {
       id: body.id,
     },
@@ -249,7 +268,7 @@ module.exports.delete = async (event) => {
 
   // Define the parameters for the DynamoDB delete operation
   const deleteParams = {
-    TableName: process.env.CATEGORIES_TABLE,
+    TableName: process.env.USERS_TABLE,
     Key: {
       id: body.id,
     },
@@ -259,9 +278,9 @@ module.exports.delete = async (event) => {
   try {
     // Get the item before deleting it
     const result = await dynamodb.get(getParams).promise();
-    const categoryToDelete = result.Item;
+    const userToDelete = result.Item;
     // Check if the item exists
-    if (!categoryToDelete) {
+    if (!userToDelete) {
       return {
         statusCode: 400,
         headers: {
@@ -290,7 +309,7 @@ module.exports.delete = async (event) => {
       body: JSON.stringify(
         {
           message: "Deleted",
-          data: categoryToDelete,
+          data: userToDelete,
         },
         null,
         2
