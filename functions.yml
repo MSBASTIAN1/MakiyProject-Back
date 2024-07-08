@@ -1,0 +1,256 @@
+functions:
+  insertSuppliers:
+    handler: handler/suppliers/handler.insert
+    events:
+      - http:
+          path: v1/suppliers/insert
+          method: post
+          cors: true
+
+  selectSuppliers:
+    handler: handler/suppliers/handler.select
+    events:
+      - http:
+          path: v1/suppliers/select
+          method: get
+          cors: true
+
+  updateSuppliers:
+    handler: handler/suppliers/handler.update
+    events:
+      - http:
+          path: v1/suppliers/update
+          method: put
+          cors: true
+
+  deleteSuppliers:
+    handler: handler/suppliers/handler.delete
+    events:
+      - http:
+          path: v1/suppliers/delete
+          method: delete
+          cors: true
+
+  insertCategories:
+    handler: handler/categories/handler.insert
+    events:
+      - http:
+          path: v1/categories/insert
+          method: post
+          cors: true
+
+  selectCategories:
+    handler: handler/categories/handler.select
+    events:
+      - http:
+          path: v1/categories/select
+          method: get
+          cors: true
+
+  updateCategories:
+    handler: handler/categories/handler.update
+    events:
+      - http:
+          path: v1/categories/update
+          method: put
+          cors: true
+
+  deleteCategories:
+    handler: handler/categories/handler.delete
+    events:
+      - http:
+          path: v1/categories/delete
+          method: delete
+          cors: true
+
+  insertUsers:
+    handler: handler/users/handler.insert
+    events:
+      - http:
+          path: v1/users/insert
+          method: post
+          cors: true
+
+  selectUsers:
+    handler: handler/users/handler.select
+    events:
+      - http:
+          path: v1/users/select
+          method: get
+          cors: true
+
+  updateUsers:
+    handler: handler/users/handler.update
+    events:
+      - http:
+          path: v1/users/update
+          method: put
+          cors: true
+
+  deleteUsers:
+    handler: handler/users/handler.delete
+    events:
+      - http:
+          path: v1/users/delete
+          method: delete
+          cors: true
+
+  insertAdmins:
+    handler: handler/admins/handler.insert
+    events:
+      - http:
+          path: v1/admins/insert
+          method: post
+          cors: true
+
+  selectAdmins:
+    handler: handler/admins/handler.select
+    events:
+      - http:
+          path: v1/admins/select
+          method: get
+          cors: true
+
+  updateAdmins:
+    handler: handler/admins/handler.update
+    events:
+      - http:
+          path: v1/admins/update
+          method: put
+          cors: true
+
+  deleteAdmins:
+    handler: handler/admins/handler.delete
+    events:
+      - http:
+          path: v1/admins/delete
+          method: delete
+          cors: true
+
+  insertProducts:
+    handler: handler/products/handler.insert
+    events:
+      - http:
+          path: v1/products/insert
+          method: post
+          cors: true
+
+  selectProducts:
+    handler: handler/products/handler.select
+    events:
+      - http:
+          path: v1/products/select
+          method: get
+          cors: true
+
+  updateProducts:
+    handler: handler/products/handler.update
+    events:
+      - http:
+          path: v1/products/update
+          method: put
+          cors: true
+
+  deleteProducts:
+    handler: handler/products/handler.delete
+    events:
+      - http:
+          path: v1/products/delete
+          method: delete
+          cors: true
+
+  insertOrders:
+    handler: handler/orders/handler.insert
+    events:
+      - http:
+          path: v1/orders/insert
+          method: post
+          cors: true
+
+  selectOrders:
+    handler: handler/orders/handler.select
+    events:
+      - http:
+          path: v1/orders/select
+          method: get
+          cors: true
+
+  updateOrders:
+    handler: handler/orders/handler.update
+    events:
+      - http:
+          path: v1/orders/update
+          method: put
+          cors: true
+
+  deleteOrders:
+    handler: handler/orders/handler.delete
+    events:
+      - http:
+          path: v1/orders/delete
+          method: delete
+          cors: true
+
+  insertOrderDetails:
+    handler: handler/orderdetails/handler.insert
+    events:
+      - http:
+          path: v1/orderdetails/insert
+          method: post
+          cors: true
+
+  selectOrderDetails:
+    handler: handler/orderdetails/handler.select
+    events:
+      - http:
+          path: v1/orderdetails/select
+          method: get
+          cors: true
+
+  updateOrderDetails:
+    handler: handler/orderdetails/handler.update
+    events:
+      - http:
+          path: v1/orderdetails/update
+          method: put
+          cors: true
+
+  deleteOrderDetails:
+    handler: handler/orderdetails/handler.delete
+    events:
+      - http:
+          path: v1/orderdetails/delete
+          method: delete
+          cors: true
+
+  insertProductReviews:
+    handler: handler/productreviews/handler.insert
+    events:
+      - http:
+          path: v1/productreviews/insert
+          method: post
+          cors: true
+
+  selectProductReviews:
+    handler: handler/productreviews/handler.select
+    events:
+      - http:
+          path: v1/productreviews/select
+          method: get
+          cors: true
+
+  updateProductReviews:
+    handler: handler/productreviews/handler.update
+    events:
+      - http:
+          path: v1/productreviews/update
+          method: put
+          cors: true
+
+  deleteProductReviews:
+    handler: handler/productreviews/handler.delete
+    events:
+      - http:
+          path: v1/productreviews/delete
+          method: delete
+          cors: true

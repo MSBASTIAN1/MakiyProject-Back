@@ -8,9 +8,16 @@ provider:
   region: us-east-1
   environment:
     REGION: ${self:provider.region}
-    CUSTOMER: CustomerTable
+    SUPPLIERS_TABLE: SuppliersTable
+    CATEGORIES_TABLE: CategoriesTable
+    USERS_TABLE: UsersTable
+    ADMINS_TABLE: AdminsTable
+    PRODUCTS_TABLE: ProductsTable
+    ORDERS_TABLE: OrdersTable
+    ORDER_DETAILS_TABLE: OrderDetailsTable
+    REVIEWS_TABLE: ReviewsTable
 
-  #Set permissions to SQS and DynamoDB
+  ## Set SQS and DynamoDB permissions
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -19,56 +26,22 @@ provider:
         - "dynamodb:UpdateItem"
         - "dynamodb:DeleteItem"
         - "dynamodb:Scan"
+      ## Permissions to all tables in the region
       Resource:
-        - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.CUSTOMER}"
+        - "arn:aws:dynamodb:${self:provider.region}:*:table/*"
 
-functions:
-  insert:
-    handler: handler.insert
-    events:
-      - http:
-          path: v1/makiy/insert
-          method: post
-          cors: true
+    ## Permissions to each table
+    # Resource:
+    #   - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.SUPPLIERS_TABLE}"
+    #   - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.CATEGORIES_TABLE}"
+    #   - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}"
+    #   - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.ADMINS_TABLE}"
+    #   - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PRODUCTS_TABLE}"
+    #   - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.ORDERS_TABLE}"
+    #   - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.ORDER_DETAILS_TABLE}"
+    #   - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.REVIEWS_TABLE}"
 
-  select:
-    handler: handler.select
-    events:
-      - http:
-          path: v1/makiy/select
-          method: get
-          cors: true
+functions: ${file(./functions.yml):functions}
 
-  update:
-    handler: handler.update
-    events:
-      - http:
-          path: v1/makiy/update
-          method: put
-          cors: true
-
-  delete:
-    handler: handler.delete
-    events:
-      - http:
-          path: v1/makiy/delete
-          method: delete
-          cors: true
-          
 resources:
-  Resources:
-    CustomerTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: CustomerTable
-        AttributeDefinitions:
-          - AttributeName: idCustomer
-            AttributeType: S
-        KeySchema:
-          - AttributeName: idCustomer
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-
-
+  Resources: ${file(./resources.yml):resources}

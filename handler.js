@@ -10,20 +10,22 @@ const dynamodb = new AWS.DynamoDB.DocumentClient({
 //Insert
 module.exports.insert = async (event) => {
   console.log("insert", event);
-  const idCustomer = uuidv4();
+  const idProducts = uuidv4();
 
   const body = JSON.parse(event.body);
 
-  const customer = {
-    idCustomer: idCustomer,
-    cedula: body.cedula,
-    name: body.name,
-    address: body.address,
+  const products = {
+    idProducts: idProducts,
+    nombre: body.nombre,
+    descripicion: body.descripicion,
+    precio: body.precio,
+    stock: body.stock,
+    
   };
 
   const params = {
-    TableName: "CustomerTable",
-    Item: customer,
+    TableName: "ProductsTable",
+    Item: products,
   };
 
   const result = await dynamodb.put(params).promise();
