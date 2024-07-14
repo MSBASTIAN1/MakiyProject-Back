@@ -127,6 +127,15 @@ functions:
           method: delete
           cors: true
 
+  insertMultipleProducts:
+      handler: handler/products/handler.insertMultiple
+      events:
+        - http:
+            path: v1/products/insertMultiple
+            method: post
+            cors: true
+  
+  
   insertProducts:
     handler: handler/products/handler.insert
     events:

@@ -6,6 +6,112 @@ const dynamodb = new AWS.DynamoDB.DocumentClient({
   region: process.env.REGION,
 });
 
+// Insert multiple products
+module.exports.insertMultiple = async (event) => {
+  console.log("insertMultipleProducts", event);
+
+  if (!event.body) {
+    return {
+      statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+      body: JSON.stringify(
+        { message: "Error: The request body is empty." },
+        null,
+        2
+      ),
+    };
+  }
+
+  const body = JSON.parse(event.body);
+
+  if (!Array.isArray(body.products) || body.products.length === 0) {
+    return {
+      statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+      body: JSON.stringify(
+        {
+          message: "Error: The request body must contain an array of products.",
+        },
+        null,
+        2
+      ),
+    };
+  }
+
+  const products = body.products.map((product) => {
+    if (
+      !product.name ||
+      !product.description ||
+      !product.price ||
+      !product.stock ||
+      !product.supplier_id ||
+      !product.image ||
+      typeof product.available !== "boolean"
+    ) {
+      throw new Error(
+        "Error: One or more products do not contain the expected data."
+      );
+    }
+
+    return {
+      PutRequest: {
+        Item: {
+          id: uuidv4(),
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          stock: product.stock,
+          supplier_id: product.supplier_id,
+          image: product.image,
+          available: product.available,
+        },
+      },
+    };
+  });
+
+  const params = {
+    RequestItems: {
+      [process.env.PRODUCTS_TABLE]: products,
+    },
+  };
+
+  try {
+    await dynamodb.batchWrite(params).promise();
+    return {
+      statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+      body: JSON.stringify(
+        { message: "Inserted Successfully", data: body.products },
+        null,
+        2
+      ),
+    };
+  } catch (error) {
+    console.error("Error inserting data", error);
+    return {
+      statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+      body: JSON.stringify(
+        { message: "Error inserting data", error: error.message },
+        null,
+        2
+      ),
+    };
+  }
+};
+
 // Insert
 module.exports.insert = async (event) => {
   console.log("insertProduct", event);
