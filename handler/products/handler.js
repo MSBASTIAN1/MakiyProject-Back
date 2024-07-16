@@ -48,6 +48,7 @@ module.exports.insertMultiple = async (event) => {
     if (
       !product.name ||
       !product.description ||
+      !product.category_id ||
       !product.price ||
       !product.stock ||
       !product.supplier_id ||
@@ -65,6 +66,7 @@ module.exports.insertMultiple = async (event) => {
           id: uuidv4(),
           name: product.name,
           description: product.description,
+          category_id: product.category_id,
           price: product.price,
           stock: product.stock,
           supplier_id: product.supplier_id,
@@ -139,6 +141,7 @@ module.exports.insert = async (event) => {
   if (
     !body.name ||
     !body.description ||
+    !body.category_id ||
     !body.price ||
     !body.stock ||
     !body.supplier_id ||
@@ -166,6 +169,7 @@ module.exports.insert = async (event) => {
     id: id,
     name: body.name,
     description: body.description,
+    category_id: body.category_id,
     price: body.price,
     stock: body.stock,
     supplier_id: body.supplier_id,
@@ -290,7 +294,7 @@ module.exports.update = async (event) => {
     TableName: process.env.PRODUCTS_TABLE,
     Key: { id: body.id },
     UpdateExpression:
-      "SET #name = :name, description = :description, price = :price, stock = :stock, supplier_id = :supplier_id, image = :image, available = :available",
+      "SET #name = :name, description = :description, category_id =:category_id, price = :price, stock = :stock, supplier_id = :supplier_id, image = :image, available = :available",
 
     ExpressionAttributeNames: {
       "#name": "name",
@@ -299,6 +303,7 @@ module.exports.update = async (event) => {
     ExpressionAttributeValues: {
       ":name": body.name,
       ":description": body.description,
+      ":category_id": body.category_id,
       ":price": body.price,
       ":stock": body.stock,
       ":supplier_id": body.supplier_id,
