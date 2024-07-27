@@ -6,6 +6,55 @@ const dynamodb = new AWS.DynamoDB.DocumentClient({
   region: process.env.REGION,
 });
 
+const s3 = new AWS.S3();
+
+// Function for upload image to S3
+const uploadImageToS3 = async (file, fileName, fileType) => {
+  const params = {
+    Bucket: process.env.AWS_S3_BUCKET_NAME,
+    Key: `images/${Date.now()}_${fileName}`,
+    Body: Buffer.from(file, "base64"),
+    ContentType: fileType,
+  };
+
+  try {
+    const uploadResult = await s3.upload(params).promise();
+    return uploadResult.Location;
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    throw error;
+  }
+};
+
+// Endpoint for upload image
+module.exports.uploadImage = async (event) => {
+  const { file, fileName, fileType } = JSON.parse(event.body);
+
+  try {
+    const url = await uploadImageToS3(file, fileName, fileType);
+    return {
+      statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+      body: JSON.stringify({ url }),
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+      body: JSON.stringify({
+        error: "Error uploading file",
+        details: error.message,
+      }),
+    };
+  }
+};
+
 // Insert multiple products
 module.exports.insertMultiple = async (event) => {
   console.log("insertMultipleProducts", event);

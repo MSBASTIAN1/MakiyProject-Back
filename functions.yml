@@ -128,14 +128,13 @@ functions:
           cors: true
 
   insertMultipleProducts:
-      handler: handler/products/handler.insertMultiple
-      events:
-        - http:
-            path: v1/products/insertMultiple
-            method: post
-            cors: true
-  
-  
+    handler: handler/products/handler.insertMultiple
+    events:
+      - http:
+          path: v1/products/insertMultiple
+          method: post
+          cors: true
+
   insertProducts:
     handler: handler/products/handler.insert
     events:
@@ -166,6 +165,14 @@ functions:
       - http:
           path: v1/products/delete
           method: delete
+          cors: true
+
+  uploadImage:
+    handler: handler/products/handler.uploadImage
+    events:
+      - http:
+          path: v1/products/upload
+          method: post
           cors: true
 
   insertOrders:

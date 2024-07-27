@@ -16,6 +16,7 @@ provider:
     ORDERS_TABLE: OrdersTable
     ORDER_DETAILS_TABLE: OrderDetailsTable
     REVIEWS_TABLE: ReviewsTable
+    AWS_S3_BUCKET_NAME: makiy-product-images-bucket
 
   ## Set SQS and DynamoDB permissions
   iamRoleStatements:
@@ -27,9 +28,12 @@ provider:
         - "dynamodb:DeleteItem"
         - "dynamodb:Scan"
         - "dynamodb:BatchWriteItem"
+        - "s3:PutObject"
+        - "s3:GetObject"
       ## Permissions to all tables in the region
       Resource:
         - "arn:aws:dynamodb:${self:provider.region}:*:table/*"
+        - "arn:aws:s3:::${self:provider.environment.AWS_S3_BUCKET_NAME}/*"
 
     ## Permissions to each table
     # Resource:
