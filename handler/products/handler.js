@@ -411,7 +411,7 @@ module.exports.update = async (event) => {
 module.exports.delete = async (event) => {
   console.log("deleteProduct", event);
 
-  if (!event.body) {
+  if (!event.pathParameters || !event.pathParameters.id) {
     return {
       statusCode: 400,
       headers: {
@@ -419,39 +419,24 @@ module.exports.delete = async (event) => {
         "Access-Control-Allow-Credentials": true,
       },
       body: JSON.stringify(
-        { message: "Error: The request body is empty." },
+        { message: "Error: The request must contain the id in the path." },
         null,
         2
       ),
     };
   }
 
-  const body = JSON.parse(event.body);
-
-  if (!body.id) {
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
-      },
-      body: JSON.stringify(
-        { message: "Error: The request body must contain the id." },
-        null,
-        2
-      ),
-    };
-  }
+  const { id } = event.pathParameters;
 
   const params = {
     TableName: process.env.PRODUCTS_TABLE,
-    Key: { id: body.id },
+    Key: { id },
     ConditionExpression: "attribute_exists(id)",
   };
 
   try {
     const result = await dynamodb
-      .get({ TableName: process.env.PRODUCTS_TABLE, Key: { id: body.id } })
+      .get({ TableName: process.env.PRODUCTS_TABLE, Key: { id } })
       .promise();
     const productToDelete = result.Item;
 
@@ -471,6 +456,14 @@ module.exports.delete = async (event) => {
     }
 
     await dynamodb.delete(params).promise();
+
+    // Optionally, delete the associated image from S3
+    const s3Params = {
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Key: productToDelete.image.split("/").slice(-1)[0], // Get the key of the image
+    };
+    await s3.deleteObject(s3Params).promise();
+
     return {
       statusCode: 200,
       headers: {

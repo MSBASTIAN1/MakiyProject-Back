@@ -30,6 +30,7 @@ provider:
         - "dynamodb:BatchWriteItem"
         - "s3:PutObject"
         - "s3:GetObject"
+        - "s3:DeleteObject"
       ## Permissions to all tables in the region
       Resource:
         - "arn:aws:dynamodb:${self:provider.region}:*:table/*"

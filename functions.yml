@@ -163,7 +163,7 @@ functions:
     handler: handler/products/handler.delete
     events:
       - http:
-          path: v1/products/delete
+          path: v1/products/delete/{id}
           method: delete
           cors: true
 
