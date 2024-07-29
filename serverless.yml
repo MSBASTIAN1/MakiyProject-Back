@@ -14,11 +14,10 @@ provider:
     ADMINS_TABLE: AdminsTable
     PRODUCTS_TABLE: ProductsTable
     ORDERS_TABLE: OrdersTable
-    ORDER_DETAILS_TABLE: OrderDetailsTable
+    LINKS_TABLE: LinksTable
     REVIEWS_TABLE: ReviewsTable
     AWS_S3_BUCKET_NAME: makiy-product-images-bucket
 
-  ## Set SQS and DynamoDB permissions
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -35,17 +34,6 @@ provider:
       Resource:
         - "arn:aws:dynamodb:${self:provider.region}:*:table/*"
         - "arn:aws:s3:::${self:provider.environment.AWS_S3_BUCKET_NAME}/*"
-
-    ## Permissions to each table
-    # Resource:
-    #   - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.SUPPLIERS_TABLE}"
-    #   - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.CATEGORIES_TABLE}"
-    #   - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}"
-    #   - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.ADMINS_TABLE}"
-    #   - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PRODUCTS_TABLE}"
-    #   - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.ORDERS_TABLE}"
-    #   - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.ORDER_DETAILS_TABLE}"
-    #   - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.REVIEWS_TABLE}"
 
 functions: ${file(./functions.yml):functions}
 

@@ -207,35 +207,35 @@ functions:
           method: delete
           cors: true
 
-  insertOrderDetails:
-    handler: handler/orderdetails/handler.insert
+  insertLink:
+    handler: handler/links/handler.insert
     events:
       - http:
-          path: v1/orderdetails/insert
+          path: v1/links/insert
           method: post
           cors: true
 
-  selectOrderDetails:
-    handler: handler/orderdetails/handler.select
+  selectLinks:
+    handler: handler/links/handler.select
     events:
       - http:
-          path: v1/orderdetails/select
+          path: v1/links/select
           method: get
           cors: true
 
-  updateOrderDetails:
-    handler: handler/orderdetails/handler.update
+  updateLink:
+    handler: handler/links/handler.update
     events:
       - http:
-          path: v1/orderdetails/update
+          path: v1/links/update
           method: put
           cors: true
 
-  deleteOrderDetails:
-    handler: handler/orderdetails/handler.delete
+  deleteLink:
+    handler: handler/links/handler.delete
     events:
       - http:
-          path: v1/orderdetails/delete
+          path: v1/links/delete
           method: delete
           cors: true
 

@@ -38,7 +38,9 @@ module.exports.insert = async (event) => {
     !body.status ||
     !body.total ||
     !body.shipping_address ||
-    !body.payment_method
+    !body.payment_method ||
+    !body.quantity || // Check for quantity
+    !body.products // Check for products
   ) {
     return {
       statusCode: 400,
@@ -65,6 +67,8 @@ module.exports.insert = async (event) => {
     total: body.total,
     shipping_address: body.shipping_address,
     payment_method: body.payment_method,
+    quantity: body.quantity, // Add quantity to the order
+    products: body.products, // Add products to the order
   };
 
   const params = {
@@ -171,7 +175,7 @@ module.exports.update = async (event) => {
     },
     // Update expression to modify the item's attributes, capturing reserved words
     UpdateExpression:
-      "SET user_id = :user_id, order_date = :order_date, #status = :status, #total = :total, shipping_address = :shipping_address, payment_method = :payment_method",
+      "SET user_id = :user_id, order_date = :order_date, #status = :status, #total = :total, shipping_address = :shipping_address, payment_method = :payment_method, quantity = :quantity, products = :products",
     // Aliases for reserved keywords
     ExpressionAttributeNames: {
       "#status": "status",
@@ -185,6 +189,8 @@ module.exports.update = async (event) => {
       ":total": body.total,
       ":shipping_address": body.shipping_address,
       ":payment_method": body.payment_method,
+      ":quantity": body.quantity, // Add quantity to the update expression
+      ":products": body.products, // Add products to the update expression
     },
     // Condition to ensure the item exists
     ConditionExpression: "attribute_exists(id)",
@@ -202,6 +208,8 @@ module.exports.update = async (event) => {
       total: body.total,
       shipping_address: body.shipping_address,
       payment_method: body.payment_method,
+      quantity: body.quantity, // Include quantity in the updated order
+      products: body.products, // Include products in the updated order
     };
 
     return {

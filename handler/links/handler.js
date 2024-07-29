@@ -8,7 +8,7 @@ const dynamodb = new AWS.DynamoDB.DocumentClient({
 
 // Insert
 module.exports.insert = async (event) => {
-  console.log("insertOrderDetail", event);
+  console.log("insertLink", event);
 
   // Check if event.body is defined and not null
   if (!event.body) {
@@ -31,11 +31,10 @@ module.exports.insert = async (event) => {
 
   // Check if body contains the expected data
   if (
-    !body.order_id ||
-    !body.product_id ||
-    !body.quantity ||
-    !body.unit_price ||
-    !body.discount
+    !body.name ||
+    !body.description ||
+    !body.content ||
+    typeof body.available !== "boolean"
   ) {
     return {
       statusCode: 400,
@@ -54,18 +53,17 @@ module.exports.insert = async (event) => {
     };
   }
 
-  const orderDetail = {
+  const link = {
     id: id,
-    order_id: body.order_id,
-    product_id: body.product_id,
-    quantity: body.quantity,
-    unit_price: body.unit_price,
-    discount: body.discount,
+    name: body.name,
+    description: body.description,
+    content: body.content,
+    available: body.available,
   };
 
   const params = {
-    TableName: process.env.ORDER_DETAILS_TABLE,
-    Item: orderDetail,
+    TableName: process.env.LINKS_TABLE,
+    Item: link,
   };
 
   try {
@@ -77,7 +75,7 @@ module.exports.insert = async (event) => {
         "Access-Control-Allow-Credentials": true,
       },
       body: JSON.stringify(
-        { message: "Inserted Successfully", data: orderDetail },
+        { message: "Inserted Successfully", data: link },
         null,
         2
       ),
@@ -101,10 +99,10 @@ module.exports.insert = async (event) => {
 
 // Select
 module.exports.select = async (event) => {
-  console.log("selectOrderDetails", event);
+  console.log("selectLinks", event);
   // Define the parameters for the DynamoDB scan operation
   const params = {
-    TableName: process.env.ORDER_DETAILS_TABLE,
+    TableName: process.env.LINKS_TABLE,
   };
 
   try {
@@ -141,7 +139,7 @@ module.exports.select = async (event) => {
 
 // Update
 module.exports.update = async (event) => {
-  console.log("updateOrderDetail", event);
+  console.log("updateLink", event);
 
   if (!event.body) {
     return {
@@ -161,7 +159,13 @@ module.exports.update = async (event) => {
   // Parse the request body to get the data provided by the client
   const body = JSON.parse(event.body);
 
-  if (!body.id) {
+  if (
+    !body.id ||
+    !body.name ||
+    !body.description ||
+    !body.content ||
+    typeof body.available !== "boolean"
+  ) {
     return {
       statusCode: 400,
       headers: {
@@ -169,7 +173,10 @@ module.exports.update = async (event) => {
         "Access-Control-Allow-Credentials": true,
       },
       body: JSON.stringify(
-        { message: "Error: The request body must contain the id." },
+        {
+          message:
+            "Error: The request body must contain the id, name, description, content and available.",
+        },
         null,
         2
       ),
@@ -177,16 +184,15 @@ module.exports.update = async (event) => {
   }
 
   const params = {
-    TableName: process.env.ORDER_DETAILS_TABLE,
+    TableName: process.env.LINKS_TABLE,
     Key: { id: body.id },
     UpdateExpression:
-      "SET order_id = :order_id, product_id = :product_id, quantity = :quantity, unit_price = :unit_price, discount = :discount",
+      "SET name = :name, description = :description, content = :content, available = :available",
     ExpressionAttributeValues: {
-      ":order_id": body.order_id,
-      ":product_id": body.product_id,
-      ":quantity": body.quantity,
-      ":unit_price": body.unit_price,
-      ":discount": body.discount,
+      ":name": body.name,
+      ":description": body.description,
+      ":content": body.content,
+      ":available": body.available,
     },
     ConditionExpression: "attribute_exists(id)",
   };
@@ -238,7 +244,7 @@ module.exports.update = async (event) => {
 
 // Delete
 module.exports.delete = async (event) => {
-  console.log("deleteOrderDetail", event);
+  console.log("deleteLink", event);
 
   if (!event.body) {
     return {
@@ -273,18 +279,18 @@ module.exports.delete = async (event) => {
   }
 
   const params = {
-    TableName: process.env.ORDER_DETAILS_TABLE,
+    TableName: process.env.LINKS_TABLE,
     Key: { id: body.id },
     ConditionExpression: "attribute_exists(id)",
   };
 
   try {
     const result = await dynamodb
-      .get({ TableName: process.env.ORDER_DETAILS_TABLE, Key: { id: body.id } })
+      .get({ TableName: process.env.LINKS_TABLE, Key: { id: body.id } })
       .promise();
-    const orderDetailToDelete = result.Item;
+    const linkToDelete = result.Item;
 
-    if (!orderDetailToDelete) {
+    if (!linkToDelete) {
       return {
         statusCode: 400,
         headers: {
@@ -307,7 +313,7 @@ module.exports.delete = async (event) => {
         "Access-Control-Allow-Credentials": true,
       },
       body: JSON.stringify(
-        { message: "Deleted Successfully", data: orderDetailToDelete },
+        { message: "Deleted Successfully", data: linkToDelete },
         null,
         2
       ),
