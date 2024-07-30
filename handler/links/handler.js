@@ -137,9 +137,21 @@ module.exports.select = async (event) => {
   }
 };
 
-// Update
+//update
 module.exports.update = async (event) => {
   console.log("updateLink", event);
+
+  if (event.httpMethod === "OPTIONS") {
+    return {
+      statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+        "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      },
+    };
+  }
 
   if (!event.body) {
     return {
@@ -156,16 +168,9 @@ module.exports.update = async (event) => {
     };
   }
 
-  // Parse the request body to get the data provided by the client
   const body = JSON.parse(event.body);
 
-  if (
-    !body.id ||
-    !body.name ||
-    !body.description ||
-    !body.content ||
-    typeof body.available !== "boolean"
-  ) {
+  if (!body.id) {
     return {
       statusCode: 400,
       headers: {
@@ -174,8 +179,7 @@ module.exports.update = async (event) => {
       },
       body: JSON.stringify(
         {
-          message:
-            "Error: The request body must contain the id, name, description, content and available.",
+          message: "Error: The request body must contain the id.",
         },
         null,
         2
@@ -187,7 +191,10 @@ module.exports.update = async (event) => {
     TableName: process.env.LINKS_TABLE,
     Key: { id: body.id },
     UpdateExpression:
-      "SET name = :name, description = :description, content = :content, available = :available",
+      "SET #name = :name, description = :description, content = :content, available = :available",
+    ExpressionAttributeNames: {
+      "#name": "name",
+    },
     ExpressionAttributeValues: {
       ":name": body.name,
       ":description": body.description,

@@ -160,28 +160,65 @@ module.exports.select = async (event) => {
   }
 };
 
-// Update
+//Update
 module.exports.update = async (event) => {
-  console.log("update", event);
+  console.log("updateOrder", event);
 
-  // Parse the request body to get the data provided by the client
+  if (event.httpMethod === "OPTIONS") {
+    return {
+      statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+        "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      },
+    };
+  }
+
+  if (!event.body) {
+    return {
+      statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+      body: JSON.stringify(
+        { message: "Error: The request body is empty." },
+        null,
+        2
+      ),
+    };
+  }
+
   const body = JSON.parse(event.body);
 
-  // Define the parameters for the DynamoDB update operation
+  if (!body.id) {
+    return {
+      statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+      body: JSON.stringify(
+        {
+          message: "Error: The request body must contain the id.",
+        },
+        null,
+        2
+      ),
+    };
+  }
+
   const params = {
-    TableName: process.env.ORDERS_TABLE, // Specify the table where the update will occur
-    Key: {
-      id: body.id, // Specify the primary key of the item to be updated
-    },
-    // Update expression to modify the item's attributes, capturing reserved words
+    TableName: process.env.ORDERS_TABLE,
+    Key: { id: body.id },
     UpdateExpression:
       "SET user_id = :user_id, order_date = :order_date, #status = :status, #total = :total, shipping_address = :shipping_address, payment_method = :payment_method, quantity = :quantity, products = :products",
-    // Aliases for reserved keywords
     ExpressionAttributeNames: {
       "#status": "status",
       "#total": "total",
     },
-    // Values for the attributes to be set
     ExpressionAttributeValues: {
       ":user_id": body.user_id,
       ":order_date": body.order_date,
@@ -189,29 +226,14 @@ module.exports.update = async (event) => {
       ":total": body.total,
       ":shipping_address": body.shipping_address,
       ":payment_method": body.payment_method,
-      ":quantity": body.quantity, // Add quantity to the update expression
-      ":products": body.products, // Add products to the update expression
+      ":quantity": body.quantity,
+      ":products": body.products,
     },
-    // Condition to ensure the item exists
     ConditionExpression: "attribute_exists(id)",
   };
 
   try {
-    // Execute the update operation and wait for it to complete
     await dynamodb.update(params).promise();
-    // Create the updated order object to display it later
-    const updatedOrder = {
-      id: body.id,
-      user_id: body.user_id,
-      order_date: body.order_date,
-      status: body.status,
-      total: body.total,
-      shipping_address: body.shipping_address,
-      payment_method: body.payment_method,
-      quantity: body.quantity, // Include quantity in the updated order
-      products: body.products, // Include products in the updated order
-    };
-
     return {
       statusCode: 200,
       headers: {
@@ -219,16 +241,12 @@ module.exports.update = async (event) => {
         "Access-Control-Allow-Credentials": true,
       },
       body: JSON.stringify(
-        {
-          message: "Updated",
-          data: updatedOrder,
-        },
+        { message: "Updated Successfully", data: body },
         null,
         2
       ),
     };
   } catch (error) {
-    // If the condition fails (if the item does not exist), DynamoDB will throw an error
     if (error.code === "ConditionalCheckFailedException") {
       return {
         statusCode: 400,
@@ -237,9 +255,7 @@ module.exports.update = async (event) => {
           "Access-Control-Allow-Credentials": true,
         },
         body: JSON.stringify(
-          {
-            message: "The item with the provided id does not exist.",
-          },
+          { message: "The item with the provided id does not exist." },
           null,
           2
         ),
@@ -253,10 +269,7 @@ module.exports.update = async (event) => {
         "Access-Control-Allow-Credentials": true,
       },
       body: JSON.stringify(
-        {
-          message: "Error updating data",
-          error: error.message,
-        },
+        { message: "Error updating data", error: error.message },
         null,
         2
       ),
