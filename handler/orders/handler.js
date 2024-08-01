@@ -34,6 +34,7 @@ module.exports.insert = async (event) => {
   // Check if body contains the expected data
   if (
     !body.user_id ||
+    !body.user_name ||
     !body.order_date ||
     !body.status ||
     !body.total ||
@@ -62,13 +63,14 @@ module.exports.insert = async (event) => {
   const order = {
     id: id,
     user_id: body.user_id,
+    user_name: body.user_name,
     order_date: body.order_date,
     status: body.status,
     total: body.total,
     shipping_address: body.shipping_address,
     payment_method: body.payment_method,
-    quantity: body.quantity, // Add quantity to the order
-    products: body.products, // Add products to the order
+    quantity: body.quantity,
+    products: body.products,
   };
 
   const params = {
@@ -214,13 +216,15 @@ module.exports.update = async (event) => {
     TableName: process.env.ORDERS_TABLE,
     Key: { id: body.id },
     UpdateExpression:
-      "SET user_id = :user_id, order_date = :order_date, #status = :status, #total = :total, shipping_address = :shipping_address, payment_method = :payment_method, quantity = :quantity, products = :products",
+      "SET user_id = :user_id, #user_name = :user_name, order_date = :order_date, #status = :status, #total = :total, shipping_address = :shipping_address, payment_method = :payment_method, quantity = :quantity, products = :products",
     ExpressionAttributeNames: {
       "#status": "status",
       "#total": "total",
+      "#user_name": "user_name",
     },
     ExpressionAttributeValues: {
       ":user_id": body.user_id,
+      ":user_name": body.user_name,
       ":order_date": body.order_date,
       ":status": body.status,
       ":total": body.total,
