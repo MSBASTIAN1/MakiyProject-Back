@@ -178,6 +178,7 @@ module.exports.update = async (event) => {
     };
   }
 
+  console.log("lllegaste");
   if (!event.body) {
     return {
       statusCode: 400,
@@ -212,6 +213,8 @@ module.exports.update = async (event) => {
     };
   }
 
+  console.log("body:", body);
+
   const params = {
     TableName: process.env.ORDERS_TABLE,
     Key: { id: body.id },
@@ -235,6 +238,8 @@ module.exports.update = async (event) => {
     },
     ConditionExpression: "attribute_exists(id)",
   };
+
+  console.log("parametros:", params);
 
   try {
     await dynamodb.update(params).promise();

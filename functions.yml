@@ -199,6 +199,14 @@ functions:
           method: put
           cors: true
 
+  updateOrderTemp:
+    handler: handler/orders/handler.updateOrderTemp
+    events:
+      - http:
+          path: v1/orders/updateOrderTemp
+          method: put
+          cors: true
+
   deleteOrders:
     handler: handler/orders/handler.delete
     events:
@@ -230,6 +238,7 @@ functions:
           path: v1/links/update
           method: put
           cors: true
+      
 
   deleteLink:
     handler: handler/links/handler.delete
@@ -237,7 +246,6 @@ functions:
       - http:
           path: v1/links/delete
           method: delete
-          cors: true
 
   insertProductReviews:
     handler: handler/productreviews/handler.insert
