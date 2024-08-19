@@ -213,7 +213,7 @@ module.exports.update = async (event) => {
         },
         body: JSON.stringify(
           {
-            message: "The item with the provided id does not exist.",
+            message: "The item with the provided id dont exist.",
           },
           null,
           2
@@ -242,32 +242,60 @@ module.exports.update = async (event) => {
 // Delete
 module.exports.delete = async (event) => {
   console.log("delete", event);
-  // Parse the request body to get the data provided by the client
-  const body = JSON.parse(event.body);
 
-  // Define the parameters to get the item before deleting it
+  if (!event.pathParameters || !event.pathParameters.id) {
+    return {
+      statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+      body: JSON.stringify(
+        { message: "Error: The request must contain the id in the path." },
+        null,
+        2
+      ),
+    };
+  }
+
+  const { id } = event.pathParameters;
+
+  // Parámetros para obtener el ítem antes de eliminarlo
   const getParams = {
     TableName: process.env.ADMINS_TABLE,
-    Key: {
-      id: body.id,
-    },
+    Key: { id },
   };
 
-  // Define the parameters for the DynamoDB delete operation
+  // Parámetros para la operación de eliminación en DynamoDB
   const deleteParams = {
     TableName: process.env.ADMINS_TABLE,
-    Key: {
-      id: body.id,
-    },
+    Key: { id },
     ConditionExpression: "attribute_exists(id)",
   };
 
   try {
-    // Get the item before deleting it
+    // Obtener el ítem antes de eliminarlo
     const result = await dynamodb.get(getParams).promise();
-    const userToDelete = result.Item;
-    // Check if the item exists
-    if (!userToDelete) {
+    const adminToDelete = result.Item;
+
+    // Verificar si el administrador es el dueño por defecto
+    if (adminToDelete.is_default_owner) {
+      return {
+        statusCode: 403,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
+        body: JSON.stringify(
+          { message: "You cannot delete the default owner administrator." },
+          null,
+          2
+        ),
+      };
+    }
+
+    // Verificar si el ítem existe
+    if (!adminToDelete) {
       return {
         statusCode: 400,
         headers: {
@@ -275,18 +303,17 @@ module.exports.delete = async (event) => {
           "Access-Control-Allow-Credentials": true,
         },
         body: JSON.stringify(
-          {
-            message: "The item with the provided id does not exist.",
-          },
+          { message: "The item with the provided id does not exist." },
           null,
           2
         ),
       };
     }
 
-    // Execute the delete operation and wait for it to complete
+    // Ejecutar la operación de eliminación
     await dynamodb.delete(deleteParams).promise();
-    // Return a response with the deleted item's data
+
+    // Retornar una respuesta con los datos del ítem eliminado
     return {
       statusCode: 200,
       headers: {
@@ -296,7 +323,7 @@ module.exports.delete = async (event) => {
       body: JSON.stringify(
         {
           message: "Deleted",
-          data: userToDelete,
+          data: adminToDelete,
         },
         null,
         2

@@ -27,7 +27,7 @@ functions:
     handler: handler/suppliers/handler.delete
     events:
       - http:
-          path: v1/suppliers/delete
+          path: v1/suppliers/delete/{id}
           method: delete
           cors: true
 
@@ -123,7 +123,7 @@ functions:
     handler: handler/admins/handler.delete
     events:
       - http:
-          path: v1/admins/delete
+          path: v1/admins/delete/{id}
           method: delete
           cors: true
 
@@ -238,7 +238,6 @@ functions:
           path: v1/links/update
           method: put
           cors: true
-      
 
   deleteLink:
     handler: handler/links/handler.delete
