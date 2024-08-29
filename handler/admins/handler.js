@@ -152,33 +152,70 @@ module.exports.select = async (event) => {
 module.exports.update = async (event) => {
   console.log("update", event);
 
-  // Parse the request body to get the data provided by the client
   const body = JSON.parse(event.body);
 
-  // Define the parameters for the DynamoDB update operation
-  const params = {
-    TableName: process.env.ADMINS_TABLE, // Specify the table where the update will occur
-    Key: {
-      id: body.id, // Specify the primary key of the item to be updated
-    },
-    // Update expression to modify the item's attributes
-    UpdateExpression:
-      "SET first_name = :first_name, last_name = :last_name, password = :password , email = :email",
-    // Values for the attributes to be set
-    ExpressionAttributeValues: {
-      ":first_name": body.first_name,
-      ":last_name": body.last_name,
-      ":password": body.password,
-      ":email": body.email,
-    },
-    // Condition to ensure the item exists
-    ConditionExpression: "attribute_exists(id)",
+  // Obtener los detalles del administrador antes de actualizar
+  const getParams = {
+    TableName: process.env.ADMINS_TABLE,
+    Key: { id: body.id },
   };
 
   try {
-    // Execute the update operation and wait for it to complete
+    const result = await dynamodb.get(getParams).promise();
+    const adminToUpdate = result.Item;
+
+    if (!adminToUpdate) {
+      return {
+        statusCode: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
+        body: JSON.stringify(
+          {
+            message: "El administrador con el id proporcionado no existe.",
+          },
+          null,
+          2
+        ),
+      };
+    }
+
+    // Verificar si el administrador que se va a actualizar es el propietario por defecto
+    if (adminToUpdate.is_default_owner) {
+      return {
+        statusCode: 403,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
+        body: JSON.stringify(
+          {
+            message: "No puedes actualizar al propietario por defecto.",
+          },
+          null,
+          2
+        ),
+      };
+    }
+
+    // Continuar con la actualización
+    const params = {
+      TableName: process.env.ADMINS_TABLE,
+      Key: { id: body.id },
+      UpdateExpression:
+        "SET first_name = :first_name, last_name = :last_name, password = :password, email = :email",
+      ExpressionAttributeValues: {
+        ":first_name": body.first_name,
+        ":last_name": body.last_name,
+        ":password": body.password,
+        ":email": body.email,
+      },
+      ConditionExpression: "attribute_exists(id)",
+    };
+
     await dynamodb.update(params).promise();
-    // Create the updated admin object to display it later
+
     const updatedAdmin = {
       id: body.id,
       first_name: body.first_name,
@@ -195,7 +232,7 @@ module.exports.update = async (event) => {
       },
       body: JSON.stringify(
         {
-          message: "Updated",
+          message: "Actualizado",
           data: updatedAdmin,
         },
         null,
@@ -203,24 +240,7 @@ module.exports.update = async (event) => {
       ),
     };
   } catch (error) {
-    // If the condition fails (if the item does not exist), DynamoDB will throw an error
-    if (error.code === "ConditionalCheckFailedException") {
-      return {
-        statusCode: 400,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
-        },
-        body: JSON.stringify(
-          {
-            message: "The item with the provided id dont exist.",
-          },
-          null,
-          2
-        ),
-      };
-    }
-    console.error("Error updating data", error);
+    console.error("Error al actualizar los datos");
     return {
       statusCode: 500,
       headers: {
@@ -229,7 +249,7 @@ module.exports.update = async (event) => {
       },
       body: JSON.stringify(
         {
-          message: "Error updating data",
+          message: "Error al actualizar los datos",
           error: error.message,
         },
         null,
